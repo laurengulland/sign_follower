@@ -74,8 +74,15 @@ class StreetSignRecognizer(object):
         geometry? What are different methods of generating candidate boxes? What defines a good box?
         """
         # TODO: YOUR SOLUTION HERE
+        # img = cv2.imread('star.jpg',0)
+        ret,thresh = cv2.threshold(self.bin_img,127,255,0)
+        im2,contours,hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        cnt = contours[0]
+        x,y,w,h = cv2.boundingRect(cnt)
+        # cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
+
         left_top = (200, 200)
-        right_bottom = (400, 400)
+        right_bottom = (left_top[0]+w, left_top[1]+h)
         return left_top, right_bottom
 
     def run(self):
