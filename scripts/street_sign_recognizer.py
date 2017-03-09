@@ -178,7 +178,7 @@ if __name__ == '__main__':
     for filename in scenes:
         scene_img = cv2.imread(filename, 0)
         pred = tm.predict(scene_img)
-        print filename.split('/')[-1]
+        # print filename.split('/')[-1]
         print pred
 
     node.run()

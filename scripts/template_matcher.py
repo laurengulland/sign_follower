@@ -1,6 +1,7 @@
 import cv2
 from scipy.linalg import norm
 import numpy as np
+from math import isnan
 
 """
 This code determines which of a set of template images matches
@@ -41,19 +42,17 @@ class TemplateMatcher(object):
             #cycle trough templage images (k) and get the image differences
             visual_diff[k] = self._compute_prediction(k, img, kp, des)
 
-        if visual_diff:
-            min_diff = min(visual_diff.values())
-            max_diff = max(visual_diff.values())
+        if visual_diff: #check if None
             val_total = sum(visual_diff.values())
+            # print 'val total', val_total
+            #BUG: "ValueError: operands could not be broadcast together with shapes (93,98) (82,100"
+
             for k in visual_diff:
-                template_confidence[k] /= val_total
+                visual_diff[k] /= val_total
 
         else: # if visual diff was not computed (bad crop, homography could not be computed)
             # set 0 confidence for all signs
             template_confidence = {k: 0 for k in self.signs.keys()}
-
-        #TODO: delete line below once the proper if statement is written
-        # template_confidence = {k: 0 for k in self.signs.keys()}
 
         return template_confidence
 
@@ -90,9 +89,9 @@ class TemplateMatcher(object):
         #     print img_kp[k][good.index(m)]
         # img_pts = [img_kp[good.index(m)] for m in good]
         # template_pts = [kp[good.index(m)] for m in good]
-        img_pts = np.float32([img_kp[m.queryIdx].pt for m in good])
+        img_pts = np.float32([kp[m.queryIdx].pt for m in good])
         img_pts.reshape(-1,1,2)
-        template_pts = np.float32([kp[m.trainIdx].pt for m in good])
+        template_pts = np.float32([img_kp[m.trainIdx].pt for m in good])
         template_pts.reshape(-1,1,2)
 
         # Transform input image so that it matches the template image as well as possible
@@ -105,11 +104,19 @@ class TemplateMatcher(object):
 
 def compare_images(img1, img2):
     #normalize images
-    # img1 = (img1-np.img1.mean())/img1.np.std()
-    # img2 = (img2-img2.np.mean())/img2.np.std()
-    img1 = normalize(img1)
-    img2 = normalize(img2)
-    #find mathematical difference between images
-    diff = img1-img2
-    norm = norm(diff.ravel(),1)
-    return diff
+    # print 'np  ', np.std(img1)
+    # print '.std', img1.std()
+
+    err = np.sum((img1.astype('float') - img2.astype('float')) ** 2)
+    err /= float(img1.shape[0] * img2.shape[1])
+    # print err
+    return err
+
+    # img1 = (img1-img1.mean())/img1.std()
+    # img2 = (img2-img2.mean())/img2.std()
+    # # img1 = normalize(img1)
+    # # img2 = normalize(img2)
+    # #find mathematical difference between images
+    # diff = img1-img2
+    # # norms = norm(diff.ravel(),1)
+    # return diff
