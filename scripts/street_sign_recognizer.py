@@ -14,6 +14,8 @@ from dynamic_reconfigure.server import Server
 from sign_follower.cfg import SignFollowingConfig
 import dynamic_reconfigure.client
 
+from template_matcher import TemplateMatcher
+
 
 class StreetSignRecognizer(object):
     """ This robot should recognize street signs """
@@ -158,28 +160,25 @@ class StreetSignRecognizer(object):
                 cv2.waitKey(5)
             r.sleep()
 
-# class TemplateMatcher(object,images):
-#
-#     def __init__(self):
-
-
 if __name__ == '__main__':
     node = StreetSignRecognizer()
+
+    images = {
+        "left": '../images/leftturn_box_small.png',
+        "right": '../images/rightturn_box_small.png',
+        "uturn": '../images/uturn_box_small.png'
+        }
+    tm = TemplateMatcher(images=images)
+    scenes = [
+    "../images/uturn_scene.jpg",
+    "../images/leftturn_scene.jpg",
+    "../images/rightturn_scene.jpg"
+    ]
+
+    for filename in scenes:
+        scene_img = cv2.imread(filename, 0)
+        pred = tm.predict(scene_img)
+        print filename.split('/')[-1]
+        print pred
+
     node.run()
-    # images = {
-    #     "left": '../images/leftturn_box_small.png',
-    #     "right": '../images/rightturn_box_small.png',
-    #     "uturn": '../images/uturn_box_small.png'
-    #     }
-    # tm = TemplateMatcher(images)
-    # scenes = [
-    #     "../images/uturn_scene.jpg",
-    #     "../images/leftturn_scene.jpg",
-    #     "../images/rightturn_scene.jpg"
-    #     ]
-    #
-    # for filename in scenes:
-    #     scene_img = cv2.imread(filename, 0)
-    #     pred = tm.predict(scene_img)
-    #     print filename.split('/')[-1]
-    #     print pred
